@@ -1,0 +1,46 @@
+name: Release Core
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      asset_path:
+        required: true
+        type: string
+      asset_name:
+        required: true
+        type: string
+      draft:
+        required: false
+        type: boolean
+        default: false
+      prerelease:
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      token:
+        required: true
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release-asset
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ inputs.version }}"
+          name: "v${{ inputs.version }}"
+          files: ${{ inputs.asset_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.token }}

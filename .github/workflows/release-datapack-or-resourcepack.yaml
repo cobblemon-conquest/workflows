@@ -1,0 +1,60 @@
+name: Package and Release
+
+on:
+  workflow_call:
+    inputs:
+      file_name:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+      folder_path:
+        required: true
+        type: string
+    secrets:
+      token:
+        required: true
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+
+    outputs:
+      zip_name: ${{ steps.zip.outputs.zip_name }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate folder exists
+        run: |
+          if [ ! -d "${{ inputs.folder_path }}" ]; then
+            echo "Folder does not exist"
+            exit 1
+          fi
+
+      - name: Create ZIP
+        id: zip
+        run: |
+          ZIP_NAME="${{ inputs.file_name }}.zip"
+          cd "${{ inputs.folder_path }}"
+          zip -r "../${ZIP_NAME}" .
+          echo "zip_name=${ZIP_NAME}" >> $GITHUB_OUTPUT
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-asset
+          path: ${{ steps.zip.outputs.zip_name }}
+
+  release:
+    needs: package
+    permissions:
+      contents: write
+    uses: ./.github/workflows/release-core.yaml
+    with:
+      version: ${{ inputs.version }}
+      asset_path: ${{ needs.package.outputs.zip_name }}
+      asset_name: ${{ needs.package.outputs.zip_name }}
+    secrets:
+      token: ${{ secrets.token }}
