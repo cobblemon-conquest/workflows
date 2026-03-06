@@ -1,4 +1,4 @@
-name: Package and Release
+name: Package and Release Resource Pack or Data Pack
 
 on:
   workflow_call:
@@ -7,9 +7,6 @@ on:
         required: true
         type: string
       version:
-        required: true
-        type: string
-      folder_path:
         required: true
         type: string
     secrets:
@@ -37,8 +34,7 @@ jobs:
         id: zip
         run: |
           ZIP_NAME="${{ inputs.file_name }}.zip"
-          cd "${{ inputs.folder_path }}"
-          zip -r "../${ZIP_NAME}" .
+          zip -r "${ZIP_NAME}" pack.mcmeta pack.png assets data
           echo "zip_name=${ZIP_NAME}" >> $GITHUB_OUTPUT
       
       - name: Upload artifact
