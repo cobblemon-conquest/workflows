@@ -23,13 +23,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Validate folder exists
-        run: |
-          if [ ! -d "${{ inputs.folder_path }}" ]; then
-            echo "Folder does not exist"
-            exit 1
-          fi
-
       - name: Create ZIP
         id: zip
         run: |
